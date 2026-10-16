@@ -1,0 +1,683 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		200000000000000000000001 /* FakeChatStoryMakerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000001 /* FakeChatStoryMakerApp.swift */; };
+		200000000000000000000002 /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000002 /* DesignSystem.swift */; };
+		200000000000000000000003 /* AppModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000003 /* AppModels.swift */; };
+		200000000000000000000004 /* ChatStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000004 /* ChatStore.swift */; };
+		200000000000000000000005 /* MockSubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000005 /* MockSubscriptionManager.swift */; };
+		200000000000000000000006 /* ExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000006 /* ExportService.swift */; };
+		200000000000000000000007 /* ResponsiveContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000007 /* ResponsiveContainer.swift */; };
+		200000000000000000000008 /* PrimaryButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000008 /* PrimaryButton.swift */; };
+		200000000000000000000009 /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000009 /* EmptyStateView.swift */; };
+		200000000000000000000010 /* PlanCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000010 /* PlanCardView.swift */; };
+		200000000000000000000011 /* ChatBubbleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000011 /* ChatBubbleView.swift */; };
+		200000000000000000000012 /* ThemePreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000012 /* ThemePreviewView.swift */; };
+		200000000000000000000013 /* ChatHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000013 /* ChatHeaderView.swift */; };
+		200000000000000000000014 /* ThemeCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000014 /* ThemeCardView.swift */; };
+		200000000000000000000015 /* ChatInputBarPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000015 /* ChatInputBarPreview.swift */; };
+		200000000000000000000016 /* FeatureRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000016 /* FeatureRowView.swift */; };
+		200000000000000000000017 /* LockBadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000017 /* LockBadgeView.swift */; };
+		200000000000000000000018 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000018 /* OnboardingView.swift */; };
+		200000000000000000000019 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000019 /* PaywallView.swift */; };
+		200000000000000000000020 /* ThemeSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000020 /* ThemeSelectionView.swift */; };
+		200000000000000000000021 /* CharacterCustomizationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000021 /* CharacterCustomizationView.swift */; };
+		200000000000000000000022 /* ExportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000022 /* ExportView.swift */; };
+		200000000000000000000023 /* PreviewModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000023 /* PreviewModeView.swift */; };
+		200000000000000000000024 /* ChatEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000024 /* ChatEditorView.swift */; };
+		200000000000000000000025 /* StoryBuilderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000025 /* StoryBuilderView.swift */; };
+		200000000000000000000026 /* StoryWorkspaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000026 /* StoryWorkspaceView.swift */; };
+		200000000000000000000027 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000027 /* HomeView.swift */; };
+		200000000000000000000028 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000028 /* SettingsView.swift */; };
+		200000000000000000000101 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000101 /* Assets.xcassets */; };
+		200000000000000000000201 /* Core/Ads/AdPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000201 /* Core/Ads/AdPolicy.swift */; };
+		200000000000000000000202 /* Core/Ads/AdsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000202 /* Core/Ads/AdsController.swift */; };
+		200000000000000000000203 /* Core/Ads/AdViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000203 /* Core/Ads/AdViews.swift */; };
+		200000000000000000000204 /* Core/Analytics/AppAnalytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000204 /* Core/Analytics/AppAnalytics.swift */; };
+		200000000000000000000206 /* Core/Analytics/AnalyticsPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000206 /* Core/Analytics/AnalyticsPolicy.swift */; };
+		5649588C307F6010008E4191 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5649588B307F6010008E4191 /* GoogleService-Info.plist */; };
+		C00000000000000000000001 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = A00000000000000000000001 /* GoogleMobileAds */; };
+		C00000000000000000000002 /* GoogleUserMessagingPlatform in Frameworks */ = {isa = PBXBuildFile; productRef = A00000000000000000000002 /* GoogleUserMessagingPlatform */; };
+		C00000000000000000000003 /* FirebaseAnalyticsCore in Frameworks */ = {isa = PBXBuildFile; productRef = A00000000000000000000003 /* FirebaseAnalyticsCore */; };
+		C00000000000000000000004 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = A00000000000000000000004 /* FirebaseCore */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		300000000000000000000001 /* FakeChatStoryMakerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FakeChatStoryMakerApp.swift; sourceTree = "<group>"; };
+		300000000000000000000002 /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystem.swift; sourceTree = "<group>"; };
+		300000000000000000000003 /* AppModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModels.swift; sourceTree = "<group>"; };
+		300000000000000000000004 /* ChatStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatStore.swift; sourceTree = "<group>"; };
+		300000000000000000000005 /* MockSubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockSubscriptionManager.swift; sourceTree = "<group>"; };
+		300000000000000000000006 /* ExportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportService.swift; sourceTree = "<group>"; };
+		300000000000000000000007 /* ResponsiveContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponsiveContainer.swift; sourceTree = "<group>"; };
+		300000000000000000000008 /* PrimaryButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrimaryButton.swift; sourceTree = "<group>"; };
+		300000000000000000000009 /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateView.swift; sourceTree = "<group>"; };
+		300000000000000000000010 /* PlanCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanCardView.swift; sourceTree = "<group>"; };
+		300000000000000000000011 /* ChatBubbleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatBubbleView.swift; sourceTree = "<group>"; };
+		300000000000000000000012 /* ThemePreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemePreviewView.swift; sourceTree = "<group>"; };
+		300000000000000000000013 /* ChatHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatHeaderView.swift; sourceTree = "<group>"; };
+		300000000000000000000014 /* ThemeCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeCardView.swift; sourceTree = "<group>"; };
+		300000000000000000000015 /* ChatInputBarPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatInputBarPreview.swift; sourceTree = "<group>"; };
+		300000000000000000000016 /* FeatureRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureRowView.swift; sourceTree = "<group>"; };
+		300000000000000000000017 /* LockBadgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockBadgeView.swift; sourceTree = "<group>"; };
+		300000000000000000000018 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		300000000000000000000019 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
+		300000000000000000000020 /* ThemeSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeSelectionView.swift; sourceTree = "<group>"; };
+		300000000000000000000021 /* CharacterCustomizationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CharacterCustomizationView.swift; sourceTree = "<group>"; };
+		300000000000000000000022 /* ExportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportView.swift; sourceTree = "<group>"; };
+		300000000000000000000023 /* PreviewModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewModeView.swift; sourceTree = "<group>"; };
+		300000000000000000000024 /* ChatEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatEditorView.swift; sourceTree = "<group>"; };
+		300000000000000000000025 /* StoryBuilderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryBuilderView.swift; sourceTree = "<group>"; };
+		300000000000000000000026 /* StoryWorkspaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryWorkspaceView.swift; sourceTree = "<group>"; };
+		300000000000000000000027 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		300000000000000000000028 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		300000000000000000000100 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		300000000000000000000101 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		300000000000000000000102 /* ChatCraft.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ChatCraft.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		300000000000000000000201 /* Core/Ads/AdPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/Ads/AdPolicy.swift; sourceTree = SOURCE_ROOT; };
+		300000000000000000000202 /* Core/Ads/AdsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/Ads/AdsController.swift; sourceTree = SOURCE_ROOT; };
+		300000000000000000000203 /* Core/Ads/AdViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/Ads/AdViews.swift; sourceTree = SOURCE_ROOT; };
+		300000000000000000000204 /* Core/Analytics/AppAnalytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/Analytics/AppAnalytics.swift; sourceTree = SOURCE_ROOT; };
+		300000000000000000000206 /* Core/Analytics/AnalyticsPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/Analytics/AnalyticsPolicy.swift; sourceTree = SOURCE_ROOT; };
+		5649588B307F6010008E4191 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		800000000000000000000003 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C00000000000000000000004 /* FirebaseCore in Frameworks */,
+				C00000000000000000000003 /* FirebaseAnalyticsCore in Frameworks */,
+				C00000000000000000000002 /* GoogleUserMessagingPlatform in Frameworks */,
+				C00000000000000000000001 /* GoogleMobileAds in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		400000000000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				300000000000000000000204 /* Core/Analytics/AppAnalytics.swift */,
+				300000000000000000000206 /* Core/Analytics/AnalyticsPolicy.swift */,
+				400000000000000000000003 /* App */,
+				300000000000000000000201 /* Core/Ads/AdPolicy.swift */,
+				300000000000000000000202 /* Core/Ads/AdsController.swift */,
+				300000000000000000000203 /* Core/Ads/AdViews.swift */,
+				400000000000000000000004 /* Core */,
+				400000000000000000000011 /* Features */,
+				400000000000000000000010 /* Components */,
+				400000000000000000000023 /* ChatCraft */,
+				400000000000000000000002 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		400000000000000000000002 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				300000000000000000000102 /* ChatCraft.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		400000000000000000000003 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				5649588B307F6010008E4191 /* GoogleService-Info.plist */,
+				300000000000000000000001 /* FakeChatStoryMakerApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		400000000000000000000004 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				400000000000000000000005 /* DesignSystem */,
+				400000000000000000000006 /* Models */,
+				400000000000000000000007 /* Storage */,
+				400000000000000000000008 /* Subscription */,
+				400000000000000000000009 /* Export */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		400000000000000000000005 /* DesignSystem */ = {
+			isa = PBXGroup;
+			children = (
+				300000000000000000000002 /* DesignSystem.swift */,
+			);
+			path = DesignSystem;
+			sourceTree = "<group>";
+		};
+		400000000000000000000006 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				300000000000000000000003 /* AppModels.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		400000000000000000000007 /* Storage */ = {
+			isa = PBXGroup;
+			children = (
+				300000000000000000000004 /* ChatStore.swift */,
+			);
+			path = Storage;
+			sourceTree = "<group>";
+		};
+		400000000000000000000008 /* Subscription */ = {
+			isa = PBXGroup;
+			children = (
+				300000000000000000000005 /* MockSubscriptionManager.swift */,
+			);
+			path = Subscription;
+			sourceTree = "<group>";
+		};
+		400000000000000000000009 /* Export */ = {
+			isa = PBXGroup;
+			children = (
+				300000000000000000000006 /* ExportService.swift */,
+			);
+			path = Export;
+			sourceTree = "<group>";
+		};
+		400000000000000000000010 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				300000000000000000000007 /* ResponsiveContainer.swift */,
+				300000000000000000000008 /* PrimaryButton.swift */,
+				300000000000000000000009 /* EmptyStateView.swift */,
+				300000000000000000000010 /* PlanCardView.swift */,
+				300000000000000000000011 /* ChatBubbleView.swift */,
+				300000000000000000000012 /* ThemePreviewView.swift */,
+				300000000000000000000013 /* ChatHeaderView.swift */,
+				300000000000000000000014 /* ThemeCardView.swift */,
+				300000000000000000000015 /* ChatInputBarPreview.swift */,
+				300000000000000000000016 /* FeatureRowView.swift */,
+				300000000000000000000017 /* LockBadgeView.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		400000000000000000000011 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				400000000000000000000012 /* Onboarding */,
+				400000000000000000000013 /* Home */,
+				400000000000000000000014 /* StoryBuilder */,
+				400000000000000000000015 /* ChatEditor */,
+				400000000000000000000016 /* Characters */,
+				400000000000000000000017 /* Themes */,
+				400000000000000000000018 /* Preview */,
+				400000000000000000000019 /* Export */,
+				400000000000000000000020 /* Paywall */,
+				400000000000000000000021 /* Settings */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		400000000000000000000012 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				300000000000000000000018 /* OnboardingView.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		400000000000000000000013 /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				300000000000000000000027 /* HomeView.swift */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		400000000000000000000014 /* StoryBuilder */ = {
+			isa = PBXGroup;
+			children = (
+				300000000000000000000025 /* StoryBuilderView.swift */,
+				300000000000000000000026 /* StoryWorkspaceView.swift */,
+			);
+			path = StoryBuilder;
+			sourceTree = "<group>";
+		};
+		400000000000000000000015 /* ChatEditor */ = {
+			isa = PBXGroup;
+			children = (
+				300000000000000000000024 /* ChatEditorView.swift */,
+			);
+			path = ChatEditor;
+			sourceTree = "<group>";
+		};
+		400000000000000000000016 /* Characters */ = {
+			isa = PBXGroup;
+			children = (
+				300000000000000000000021 /* CharacterCustomizationView.swift */,
+			);
+			path = Characters;
+			sourceTree = "<group>";
+		};
+		400000000000000000000017 /* Themes */ = {
+			isa = PBXGroup;
+			children = (
+				300000000000000000000020 /* ThemeSelectionView.swift */,
+			);
+			path = Themes;
+			sourceTree = "<group>";
+		};
+		400000000000000000000018 /* Preview */ = {
+			isa = PBXGroup;
+			children = (
+				300000000000000000000023 /* PreviewModeView.swift */,
+			);
+			path = Preview;
+			sourceTree = "<group>";
+		};
+		400000000000000000000019 /* Export */ = {
+			isa = PBXGroup;
+			children = (
+				300000000000000000000022 /* ExportView.swift */,
+			);
+			path = Export;
+			sourceTree = "<group>";
+		};
+		400000000000000000000020 /* Paywall */ = {
+			isa = PBXGroup;
+			children = (
+				300000000000000000000019 /* PaywallView.swift */,
+			);
+			path = Paywall;
+			sourceTree = "<group>";
+		};
+		400000000000000000000021 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				300000000000000000000028 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		400000000000000000000023 /* ChatCraft */ = {
+			isa = PBXGroup;
+			children = (
+				300000000000000000000100 /* Info.plist */,
+				300000000000000000000101 /* Assets.xcassets */,
+			);
+			path = ChatCraft;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		500000000000000000000001 /* ChatCraft */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 700000000000000000000001 /* Build configuration list for PBXNativeTarget "ChatCraft" */;
+			buildPhases = (
+				800000000000000000000001 /* Sources */,
+				800000000000000000000003 /* Frameworks */,
+				800000000000000000000002 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ChatCraft;
+			packageProductDependencies = (
+				A00000000000000000000004 /* FirebaseCore */,
+				A00000000000000000000003 /* FirebaseAnalyticsCore */,
+				A00000000000000000000001 /* GoogleMobileAds */,
+				A00000000000000000000002 /* GoogleUserMessagingPlatform */,
+			);
+			productName = ChatCraft;
+			productReference = 300000000000000000000102 /* ChatCraft.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		900000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2600;
+				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+					500000000000000000000001 = {
+						CreatedOnToolsVersion = 26.5;
+					};
+				};
+			};
+			buildConfigurationList = 700000000000000000000002 /* Build configuration list for PBXProject "ChatCraft" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 400000000000000000000001;
+			packageReferences = (
+				B00000000000000000000003 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				B00000000000000000000001 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */,
+				B00000000000000000000002 /* XCRemoteSwiftPackageReference "swift-package-manager-google-user-messaging-platform" */,
+			);
+			productRefGroup = 400000000000000000000002 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				500000000000000000000001 /* ChatCraft */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		800000000000000000000002 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				200000000000000000000101 /* Assets.xcassets in Resources */,
+				5649588C307F6010008E4191 /* GoogleService-Info.plist in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		800000000000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				200000000000000000000204 /* Core/Analytics/AppAnalytics.swift in Sources */,
+				200000000000000000000206 /* Core/Analytics/AnalyticsPolicy.swift in Sources */,
+				200000000000000000000001 /* FakeChatStoryMakerApp.swift in Sources */,
+				200000000000000000000203 /* Core/Ads/AdViews.swift in Sources */,
+				200000000000000000000202 /* Core/Ads/AdsController.swift in Sources */,
+				200000000000000000000201 /* Core/Ads/AdPolicy.swift in Sources */,
+				200000000000000000000002 /* DesignSystem.swift in Sources */,
+				200000000000000000000003 /* AppModels.swift in Sources */,
+				200000000000000000000004 /* ChatStore.swift in Sources */,
+				200000000000000000000005 /* MockSubscriptionManager.swift in Sources */,
+				200000000000000000000006 /* ExportService.swift in Sources */,
+				200000000000000000000007 /* ResponsiveContainer.swift in Sources */,
+				200000000000000000000008 /* PrimaryButton.swift in Sources */,
+				200000000000000000000009 /* EmptyStateView.swift in Sources */,
+				200000000000000000000010 /* PlanCardView.swift in Sources */,
+				200000000000000000000011 /* ChatBubbleView.swift in Sources */,
+				200000000000000000000012 /* ThemePreviewView.swift in Sources */,
+				200000000000000000000013 /* ChatHeaderView.swift in Sources */,
+				200000000000000000000014 /* ThemeCardView.swift in Sources */,
+				200000000000000000000015 /* ChatInputBarPreview.swift in Sources */,
+				200000000000000000000016 /* FeatureRowView.swift in Sources */,
+				200000000000000000000017 /* LockBadgeView.swift in Sources */,
+				200000000000000000000018 /* OnboardingView.swift in Sources */,
+				200000000000000000000019 /* PaywallView.swift in Sources */,
+				200000000000000000000020 /* ThemeSelectionView.swift in Sources */,
+				200000000000000000000021 /* CharacterCustomizationView.swift in Sources */,
+				200000000000000000000022 /* ExportView.swift in Sources */,
+				200000000000000000000023 /* PreviewModeView.swift in Sources */,
+				200000000000000000000024 /* ChatEditorView.swift in Sources */,
+				200000000000000000000025 /* StoryBuilderView.swift in Sources */,
+				200000000000000000000026 /* StoryWorkspaceView.swift in Sources */,
+				200000000000000000000027 /* HomeView.swift in Sources */,
+				200000000000000000000028 /* SettingsView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		600000000000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ADMOB_APP_ID = "ca-app-pub-3940256099942544~1458002511";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1.0;
+				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = WFSZ3VZNKR;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ChatCraft/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.4;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.chatcraft;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		600000000000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ADMOB_APP_ID = "ca-app-pub-3587863765939885~2046449452";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1.0;
+				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = WFSZ3VZNKR;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ChatCraft/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.4;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.chatcraft;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		600000000000000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+			};
+			name = Debug;
+		};
+		600000000000000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		700000000000000000000001 /* Build configuration list for PBXNativeTarget "ChatCraft" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				600000000000000000000001 /* Debug */,
+				600000000000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		700000000000000000000002 /* Build configuration list for PBXProject "ChatCraft" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				600000000000000000000003 /* Debug */,
+				600000000000000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		B00000000000000000000001 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/googleads/swift-package-manager-google-mobile-ads.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 13.11.0;
+			};
+		};
+		B00000000000000000000002 /* XCRemoteSwiftPackageReference "swift-package-manager-google-user-messaging-platform" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/googleads/swift-package-manager-google-user-messaging-platform.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.1.0;
+			};
+		};
+		B00000000000000000000003 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 13.0.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A00000000000000000000001 /* GoogleMobileAds */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B00000000000000000000001 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */;
+			productName = GoogleMobileAds;
+		};
+		A00000000000000000000002 /* GoogleUserMessagingPlatform */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B00000000000000000000002 /* XCRemoteSwiftPackageReference "swift-package-manager-google-user-messaging-platform" */;
+			productName = GoogleUserMessagingPlatform;
+		};
+		A00000000000000000000003 /* FirebaseAnalyticsCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B00000000000000000000003 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsCore;
+		};
+		A00000000000000000000004 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B00000000000000000000003 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 900000000000000000000001 /* Project object */;
+}
