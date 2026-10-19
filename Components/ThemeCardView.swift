@@ -19,7 +19,7 @@ struct ThemeCardView: View {
           Text(theme.name)
             .font((isCompactDevice ? Font.subheadline : Font.headline).weight(.heavy))
             .foregroundStyle(titleColor)
-            .lineLimit(isCompactDevice ? 1 : 2)
+            .lineLimit(2)
             .minimumScaleFactor(0.82)
             .fixedSize(horizontal: false, vertical: true)
 
@@ -33,7 +33,7 @@ struct ThemeCardView: View {
         Text(theme.subtitle)
           .font((isCompactDevice ? Font.caption2 : Font.caption).weight(.semibold))
           .foregroundStyle(subtitleColor)
-          .lineLimit(isCompactDevice ? 1 : 2)
+          .lineLimit(2)
           .minimumScaleFactor(0.84)
           .fixedSize(horizontal: false, vertical: true)
 

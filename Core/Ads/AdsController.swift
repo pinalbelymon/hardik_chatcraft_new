@@ -36,6 +36,7 @@ final class AdsController: NSObject, ObservableObject, FullScreenContentDelegate
     private var sessions = 0
     private var appOpenBlockers: Set<UUID> = []
     private var subscriptions: Set<AnyCancellable> = []
+    private var onDismissCallback: (() -> Void)?
 
     func bind(to manager: SubscriptionManager) {
         guard subscriptions.isEmpty else { return }
@@ -176,10 +177,17 @@ final class AdsController: NSObject, ObservableObject, FullScreenContentDelegate
         }
     }
 
-    private func loadInterstitial() async {
+    func preloadInterstitialIfNeeded() {
+        guard canRequestAds else { return }
+        if interstitial == nil || !AdPolicy.isFresh(loadedAt: interstitialLoadedAt, now: Date(), lifetime: AdPolicy.interstitialLifetime) {
+            Task { await loadInterstitial(force: true) }
+        }
+    }
+
+    private func loadInterstitial(force: Bool = false) async {
         guard canRequestAds, !loadingInterstitial,
               !AdPolicy.isFresh(loadedAt: interstitialLoadedAt, now: Date(), lifetime: AdPolicy.interstitialLifetime) || interstitial == nil,
-              AdPolicy.cooldownElapsed(lastPresentation: lastInterstitialAttempt, now: Date(), interval: 60) else { return }
+              force || AdPolicy.cooldownElapsed(lastPresentation: lastInterstitialAttempt, now: Date(), interval: 60) else { return }
         loadingInterstitial = true
         lastInterstitialAttempt = Date()
         defer { loadingInterstitial = false }
@@ -219,6 +227,87 @@ final class AdsController: NSObject, ObservableObject, FullScreenContentDelegate
         ad.present(from: Self.presenter)
     }
 
+    /// Shows an interstitial ad if eligible and available, then invokes onDismiss after dismissal.
+    /// If ads are disabled, unavailable, or fail to present, onDismiss is invoked immediately.
+    func showInterstitial(onDismiss: @escaping () -> Void) {
+        #if DEBUG
+        NSLog("[Ads] showInterstitial requested; canRequest=%d showingFS=%d ready=%d", canRequestAds, showingFullScreen, interstitial != nil)
+        #endif
+        guard canRequestAds, !showingFullScreen, !preparingConsent,
+              UIApplication.shared.applicationState == .active else {
+            onDismiss()
+            return
+        }
+
+        if let ad = interstitial,
+           AdPolicy.isFresh(loadedAt: interstitialLoadedAt, now: Date(), lifetime: AdPolicy.interstitialLifetime),
+           let presenter = Self.topPresenter ?? Self.presenter {
+            do {
+                try ad.canPresent(from: presenter)
+                self.onDismissCallback = onDismiss
+                self.presentedAd = ad
+                self.presentedFormat = "interstitial"
+                self.showingFullScreen = true
+                self.interstitial = nil
+                ad.present(from: presenter)
+                return
+            } catch {
+                self.interstitial = nil
+                logger.notice("Interstitial cannot present: \(error.localizedDescription, privacy: .public)")
+            }
+        }
+
+        Task { @MainActor in
+            await self.loadAndPresentInterstitial(onDismiss: onDismiss)
+        }
+    }
+
+    private func loadAndPresentInterstitial(onDismiss: @escaping () -> Void) async {
+        guard canRequestAds, !showingFullScreen, !preparingConsent,
+              UIApplication.shared.applicationState == .active,
+              let presenter = Self.topPresenter ?? Self.presenter else {
+            onDismiss()
+            return
+        }
+
+        loadingInterstitial = true
+        defer { loadingInterstitial = false }
+
+        let loadTask = Task { @MainActor () -> InterstitialAd in
+            try await InterstitialAd.load(with: AdUnits.interstitial, request: Request())
+        }
+
+        let timeoutTask = Task {
+            try await Task.sleep(nanoseconds: 2_500_000_000)
+            loadTask.cancel()
+        }
+
+        do {
+            let ad = try await loadTask.value
+            timeoutTask.cancel()
+
+            guard canRequestAds, !showingFullScreen,
+                  UIApplication.shared.applicationState == .active,
+                  let currentPresenter = Self.topPresenter ?? Self.presenter else {
+                onDismiss()
+                return
+            }
+
+            try ad.canPresent(from: currentPresenter)
+            ad.fullScreenContentDelegate = self
+            self.onDismissCallback = onDismiss
+            self.presentedAd = ad
+            self.presentedFormat = "interstitial"
+            self.showingFullScreen = true
+            ad.present(from: currentPresenter)
+        } catch {
+            timeoutTask.cancel()
+            logger.notice("Quick interstitial load/present skipped: \(error.localizedDescription, privacy: .public)")
+            preloadFullScreenAds()
+            onDismiss()
+        }
+    }
+
     /// Called after a successful export or an explicit Save & Close, at a natural break.
     func completedNaturalBreak() {
         #if DEBUG
@@ -227,13 +316,14 @@ final class AdsController: NSObject, ObservableObject, FullScreenContentDelegate
         guard safeToPresent,
               AdPolicy.cooldownElapsed(lastPresentation: lastFullScreen, now: Date(), interval: AdPolicy.interstitialCooldown),
               AdPolicy.isFresh(loadedAt: interstitialLoadedAt, now: Date(), lifetime: AdPolicy.interstitialLifetime),
-              let ad = interstitial else { preloadFullScreenAds(); return }
-        do { try ad.canPresent(from: Self.presenter) } catch { interstitial = nil; return }
+              let ad = interstitial,
+              let presenter = Self.topPresenter ?? Self.presenter else { preloadFullScreenAds(); return }
+        do { try ad.canPresent(from: presenter) } catch { interstitial = nil; return }
         presentedAd = ad
         presentedFormat = "interstitial"
         showingFullScreen = true
         interstitial = nil
-        ad.present(from: Self.presenter)
+        ad.present(from: presenter)
     }
 
     func adWillPresentFullScreenContent(_ ad: FullScreenPresentingAd) {
@@ -255,10 +345,35 @@ final class AdsController: NSObject, ObservableObject, FullScreenContentDelegate
         lastFullScreen = Date()
         UserDefaults.standard.set(lastFullScreen, forKey: "ads_last_fullscreen")
         preloadFullScreenAds()
+
+        if let callback = onDismissCallback {
+            onDismissCallback = nil
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                callback()
+            }
+        }
     }
 
     static var presenter: UIViewController? {
         let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
         return scenes.first { $0.activationState == .foregroundActive }?.windows.first { $0.isKeyWindow }?.rootViewController
+    }
+
+    static var topPresenter: UIViewController? {
+        topViewController(from: presenter)
+    }
+
+    static func topViewController(from root: UIViewController?) -> UIViewController? {
+        guard let root else { return nil }
+        if let nav = root as? UINavigationController {
+            return topViewController(from: nav.visibleViewController ?? nav.topViewController)
+        }
+        if let tab = root as? UITabBarController {
+            return topViewController(from: tab.selectedViewController)
+        }
+        if let presented = root.presentedViewController, !presented.isBeingDismissed {
+            return topViewController(from: presented)
+        }
+        return root
     }
 }

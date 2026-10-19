@@ -27,7 +27,6 @@ struct ExportView: View {
 
     @State private var showExportShare = false
     @State private var isExportVisible = false
-    @State private var exportAdTask: Task<Void, Never>?
     @State private var selectedFormat: ExportFormat = .vertical916
     @State private var exportScope: ExportScope = .conversationArea
     @State private var includeWatermark = true
@@ -61,7 +60,6 @@ struct ExportView: View {
         }
         .onDisappear {
             isExportVisible = false
-            exportAdTask?.cancel()
         }
         .background(PremiumBackdrop())
         .trackScreen(.export)
@@ -69,6 +67,7 @@ struct ExportView: View {
             isExportVisible = true
             includeWatermark = !subscriptionManager.canExportWithoutWatermark()
             selectedFormat = story.exportFormat
+            AdsController.shared.preloadInterstitialIfNeeded()
         }
         .onChange(of: selectedFormat) { value in
             AppAnalytics.shared.track(.exportOption, ["option": "format", "value": value.rawValue])
@@ -328,16 +327,17 @@ struct ExportView: View {
         .frame(width: layoutWidth)
 
         do {
-            exportedURL = try ScreenshotExportService.export(
+            let url = try ScreenshotExportService.export(
                 view: view,
                 format: selectedFormat,
                 fileName: story.title,
                 scale: renderScale
             )
+            exportedURL = url
             exportedAssetKind = .image
             AppAnalytics.shared.track(.exportSuccess, ["media_type": "image", "format": selectedFormat.rawValue, "scope": exportScope.rawValue, "duration_ms": Int(Date().timeIntervalSince(analyticsStart) * 1000)])
             statusMessage = "Image export is ready."
-            scheduleExportAd()
+            handleExportCompletion(url: url)
         } catch {
             AppAnalytics.shared.track(.exportFailure, ["media_type": "image", "reason": "render_failed"])
             statusMessage = error.localizedDescription
@@ -345,13 +345,17 @@ struct ExportView: View {
     }
 
     @MainActor
-    private func scheduleExportAd() {
-        exportAdTask?.cancel()
-        exportAdTask = Task { @MainActor in
-            // Let the completed export update its UI; never wait for ad inventory.
-            try? await Task.sleep(nanoseconds: 350_000_000)
-            guard !Task.isCancelled, isExportVisible, !isExporting, !showExportShare else { return }
-            AdsController.shared.completedNaturalBreak()
+    private func handleExportCompletion(url: URL) {
+        let isFreeUser = subscriptionManager.currentPlan == .free
+
+        if isFreeUser {
+            AdsController.shared.showInterstitial {
+                AppAnalytics.shared.track(.exportShareOpen, ["media_type": self.exportedAssetKind == .video ? "video" : "image"])
+                self.showExportShare = true
+            }
+        } else {
+            AppAnalytics.shared.track(.exportShareOpen, ["media_type": exportedAssetKind == .video ? "video" : "image"])
+            showExportShare = true
         }
     }
 
@@ -385,15 +389,16 @@ struct ExportView: View {
 
         do {
             let frames = try renderVideoFrames()
-            exportedURL = try await VideoExportService().exportVideo(
+            let url = try await VideoExportService().exportVideo(
                 frames: frames,
                 format: selectedFormat,
                 fileName: story.title
             )
+            exportedURL = url
             exportedAssetKind = .video
             AppAnalytics.shared.track(.exportSuccess, ["media_type": "video", "format": selectedFormat.rawValue, "duration_ms": Int(Date().timeIntervalSince(analyticsStart) * 1000)])
             statusMessage = "Video export is ready."
-            scheduleExportAd()
+            handleExportCompletion(url: url)
         } catch {
             AppAnalytics.shared.track(.exportFailure, ["media_type": "video", "reason": "render_failed"])
             statusMessage = error.localizedDescription

@@ -4,7 +4,6 @@ import GoogleMobileAds
 
 private enum AdLoadState { case idle, loading, loaded, failed }
 
-/// Shimmer exists only during a bounded network request; no perpetual animation when offscreen.
 private struct AdShimmer: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var phase = false
@@ -17,12 +16,16 @@ private struct AdShimmer: View {
                         LinearGradient(colors: [.clear, .white.opacity(0.30), .clear], startPoint: .leading, endPoint: .trailing)
                             .frame(width: geometry.size.width * 0.5)
                             .offset(x: phase ? geometry.size.width : -geometry.size.width * 0.5)
+                            .animation(
+                                reduceMotion ? nil : .linear(duration: 1.2).repeatForever(autoreverses: false),
+                                value: phase
+                            )
                     }.clipped()
                 }
             }
             .onAppear {
                 guard !reduceMotion else { return }
-                withAnimation(.linear(duration: 1.2).repeatForever(autoreverses: false)) { phase = true }
+                phase = true
             }
             .accessibilityLabel("Loading advertisement")
     }
@@ -90,20 +93,23 @@ struct BannerAdSlot: View {
     @StateObject private var model = BannerModel()
     var body: some View {
         VStack(spacing: 0) {
-            if ads.canRequestAds {
-                if (model.state == .loading || model.state == .loaded), let banner = model.view {
-                    ZStack {
-                        // Keep the SDK view attached while loading so visibility/refresh work correctly.
+            if ads.canRequestAds && model.state != .failed {
+                ZStack {
+                    // Keep the SDK view attached while loading so visibility/refresh work correctly.
+                    if let banner = model.view {
                         BannerContent(banner: banner).frame(width: 320, height: 50)
                             .opacity(model.state == .loaded ? 1 : 0)
                             .allowsHitTesting(model.state == .loaded)
-                        if model.state == .loading { AdShimmer().frame(width: 320, height: 50) }
                     }
-                    .frame(maxWidth: .infinity).frame(height: 60)
-                    .background(Color(uiColor: .systemBackground))
+                    if model.state != .loaded {
+                        AdShimmer().frame(width: 320, height: 50)
+                    }
                 }
+                .frame(maxWidth: .infinity).frame(height: 60)
+                .background(Color(uiColor: .systemBackground))
             }
         }
+        .transaction { $0.animation = nil }
         .task(id: ads.canRequestAds) {
             if ads.canRequestAds { model.load() } else { model.clear() }
         }
@@ -124,7 +130,7 @@ private final class NativeModel: NSObject, ObservableObject, NativeAdLoaderDeleg
         state = .loading
         let options = NativeAdMediaAdLoaderOptions()
         options.mediaAspectRatio = .landscape
-        let loader = AdLoader(adUnitID: AdUnits.native, rootViewController: AdsController.presenter, adTypes: [.native], options: [options])
+        let loader = AdLoader(adUnitID: AdUnits.native, rootViewController: AdsController.topPresenter ?? AdsController.presenter, adTypes: [.native], options: [options])
         self.loader = loader
         loader.delegate = self
         loader.load(Request())
@@ -246,6 +252,7 @@ struct NativeAdSlot: View {
                 }
             }
         }
+        .transaction { $0.animation = nil }
         .task(id: ads.canRequestAds) {
             if ads.canRequestAds { model.load() } else { model.clear() }
         }

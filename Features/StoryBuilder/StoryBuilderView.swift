@@ -54,15 +54,17 @@ struct StoryBuilderView: View {
                 createButton
             }
         }
-        .detailAds()
-        .trackScreen(.storyBuilder)
         .navigationTitle("New Story")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.visible, for: .navigationBar)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button("Cancel") { dismiss() }
+                    .transaction { $0.animation = nil }
             }
         }
+        .detailAds()
+        .trackScreen(.storyBuilder)
         .fullScreenCover(isPresented: $showPaywall) {
             NavigationStack { PaywallView() }
         }
@@ -178,11 +180,11 @@ struct StoryBuilderView: View {
                                     .font(.subheadline.weight(.heavy))
                                     .foregroundStyle(isSelected ? .white : .primary)
                                     .lineLimit(2)
-                                    .minimumScaleFactor(0.82)
+                                    .minimumScaleFactor(0.72)
                                     .multilineTextAlignment(.leading)
                             }
                             .padding(AppSpacing.sm)
-                            .frame(width: 168, height: 78, alignment: .leading)
+                            .frame(width: 168, height: 82, alignment: .leading)
                             .background(
                                 isSelected ? AnyShapeStyle(AppColors.brandGradient) : AnyShapeStyle(.regularMaterial),
                                 in: RoundedRectangle(cornerRadius: AppRadius.lg, style: .continuous)
@@ -201,7 +203,9 @@ struct StoryBuilderView: View {
     }
 
     private var castSection: some View {
-        VStack(alignment: .leading, spacing: AppSpacing.sm) {
+        let canAdd = subscriptionManager.canAddCharacter(currentCharacterCount: characters.count)
+
+        return VStack(alignment: .leading, spacing: AppSpacing.sm) {
             HStack {
                 Text("Cast / Characters")
                     .font(.headline.weight(.bold))
@@ -209,24 +213,27 @@ struct StoryBuilderView: View {
                 Button {
                     addCharacter()
                 } label: {
-                    Label("Add Character", systemImage: "plus.circle.fill")
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(AppColors.mint)
+                    HStack(spacing: 4) {
+                        Image(systemName: canAdd ? "plus.circle.fill" : "lock.fill")
+                            .font(.caption)
+                        Text("Add Character")
+                            .font(.caption.weight(.bold))
+                    }
+                    .foregroundStyle(canAdd ? AppColors.mint : AppColors.appTint)
                 }
-                .disabled(!subscriptionManager.canAddCharacter(currentCharacterCount: characters.count))
             }
 
             ForEach($characters) { $character in
                 let accent = resolvedCharacterColor(character)
 
-                HStack(spacing: AppSpacing.sm) {
+                HStack(spacing: isCompactDevice ? 8 : AppSpacing.sm) {
                     ZStack {
                         Circle()
                             .fill(accent)
-                            .frame(width: 34, height: 34)
+                            .frame(width: isCompactDevice ? 30 : 34, height: isCompactDevice ? 30 : 34)
 
                         Image(systemName: character.avatarSymbol)
-                            .font(.system(size: 14, weight: .bold))
+                            .font(.system(size: isCompactDevice ? 12 : 14, weight: .bold))
                             .foregroundStyle(.white)
                     }
                     .overlay(Circle().stroke(Color.white.opacity(0.2), lineWidth: 1))
@@ -236,18 +243,51 @@ struct StoryBuilderView: View {
                         .textInputAutocapitalization(.words)
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(colorScheme == .dark ? Color.white : Color.primary)
+                        .lineLimit(1)
 
-                    Picker("Side", selection: $character.side) {
+                    Menu {
                         ForEach(SenderSide.allCases) { side in
-                            Text(side.title).tag(side)
+                            Button {
+                                character.side = side
+                            } label: {
+                                HStack {
+                                    Text(side.title)
+                                    if character.side == side {
+                                        Image(systemName: "checkmark")
+                                    }
+                                }
+                            }
                         }
+                    } label: {
+                        HStack(spacing: 3) {
+                            Text(character.side.title)
+                                .font(.subheadline.weight(.semibold))
+                                .lineLimit(1)
+                            Image(systemName: "chevron.up.chevron.down")
+                                .font(.system(size: 10, weight: .semibold))
+                        }
+                        .foregroundStyle(AppColors.appTint)
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 4)
+                        .fixedSize(horizontal: true, vertical: false)
                     }
-                    .labelsHidden()
-                    .pickerStyle(.menu)
-                    .tint(AppColors.appTint)
+
+                    if characters.count > 2 {
+                        Button {
+                            withAnimation(.spring(response: 0.28, dampingFraction: 0.82)) {
+                                characters.removeAll { $0.id == character.id }
+                            }
+                        } label: {
+                            Image(systemName: "minus.circle.fill")
+                                .font(.system(size: 18))
+                                .foregroundStyle(Color.red.opacity(0.85))
+                        }
+                        .buttonStyle(.plain)
+                        .fixedSize(horizontal: true, vertical: false)
+                    }
                 }
-                .padding(.horizontal, AppSpacing.sm)
-                .padding(.vertical, 8)
+                .padding(.horizontal, isCompactDevice ? 8 : AppSpacing.sm)
+                .padding(.vertical, isCompactDevice ? 6 : 8)
                 .background(.regularMaterial, in: RoundedRectangle(cornerRadius: AppRadius.md, style: .continuous))
                 .overlay(
                     RoundedRectangle(cornerRadius: AppRadius.md, style: .continuous)
@@ -348,14 +388,16 @@ struct StoryBuilderView: View {
             return
         }
         AppAnalytics.shared.track(.characterAdd, ["character_count": characters.count + 1, "source": "story_builder"])
-        characters.append(
-            ChatCharacter(
-                name: "Character \(characters.count + 1)",
-                avatarSymbol: ChatCharacter.avatarSymbols[characters.count % ChatCharacter.avatarSymbols.count],
-                bubbleColorHex: "#4F7CFF",
-                side: characters.count.isMultiple(of: 2) ? .left : .right
+        withAnimation(.spring(response: 0.28, dampingFraction: 0.82)) {
+            characters.append(
+                ChatCharacter(
+                    name: "Character \(characters.count + 1)",
+                    avatarSymbol: ChatCharacter.avatarSymbols[characters.count % ChatCharacter.avatarSymbols.count],
+                    bubbleColorHex: "#4F7CFF",
+                    side: characters.count.isMultiple(of: 2) ? .left : .right
+                )
             )
-        )
+        }
     }
 
     private func resolvedCharacterColor(_ character: ChatCharacter) -> Color {

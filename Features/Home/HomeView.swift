@@ -16,6 +16,7 @@ struct HomeView: View {
   private var secondary: Color { colorScheme == .dark ? Color(hex: "#B8C2D2") : Color(hex: "#596575") }
   private var messageCount: Int { store.stories.reduce(0) { $0 + $1.messages.count } }
   private var isPad: Bool { UIDevice.current.userInterfaceIdiom == .pad }
+  private var isCompactDevice: Bool { DeviceSize.isCurrentCompactHeight }
 
   var body: some View {
     NavigationStack(path: $navigationPath) {
@@ -23,7 +24,7 @@ struct HomeView: View {
         ScrollView {
           VStack(alignment: .leading, spacing: 20) {
             header
-            createBanner
+            createBanner(width: geometry.size.width)
             if !store.stories.isEmpty {
               continueSection
             }
@@ -57,17 +58,30 @@ struct HomeView: View {
       .sheet(isPresented: $showStyles) {
         NavigationStack {
           ScrollView {
-            AdSupportedGrid(items: ChatTheme.all, columns: 2, spacing: 16) { theme in
+            VStack(spacing: 0) {
+              AdSupportedGrid(items: ChatTheme.all, columns: 2, spacing: 16) { theme in
                 styleCard(theme) {
                   showStyles = false
                   DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { createStory(themeID: theme.id) }
                 }
-            }.padding(16)
+              }
+              .padding(.horizontal, 16)
+              .padding(.top, 16)
+
+              // Extra bottom space so cards are always fully visible above the bottom banner ad, even if native ad fails
+              Spacer()
+                .frame(height: 80)
+            }
           }
           .detailAds()
           .trackScreen(.allStyles)
           .navigationTitle("All Styles")
-          .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { showStyles = false } } }
+          .toolbar {
+            ToolbarItem(placement: .confirmationAction) {
+              Button("Done") { showStyles = false }
+                .transaction { $0.animation = nil }
+            }
+          }
         }
       }
       .navigationDestination(for: UUID.self) { StoryWorkspaceView(storyID: $0) }
@@ -89,29 +103,41 @@ struct HomeView: View {
     }.padding(.horizontal, 4).padding(.bottom, 2)
   }
 
-  private var createBanner: some View {
-    Button { createStory() } label: {
-      HStack(spacing: 14) {
+  private func createBanner(width: CGFloat) -> some View {
+    let isCompact = isCompactDevice || width <= 380
+
+    return Button { createStory() } label: {
+      HStack(spacing: isCompact ? 10 : 14) {
         Image(systemName: "plus.message.fill")
-          .font(.system(size: 36, weight: .bold))
-          .frame(width: 66, height: 70)
-          .background(.white.opacity(0.14), in: RoundedRectangle(cornerRadius: 18))
-        VStack(alignment: .leading, spacing: 5) {
-          Text("New Story").font(.system(size: 25, weight: .bold)).lineLimit(1).minimumScaleFactor(0.8)
-          Text("Start with quick setup").font(.system(size: 14)).lineLimit(1).minimumScaleFactor(0.75).opacity(0.88)
-        }.layoutPriority(1)
-        Spacer(minLength: 0)
+          .font(.system(size: isCompact ? 28 : 36, weight: .bold))
+          .frame(width: isCompact ? 52 : 66, height: isCompact ? 56 : 70)
+          .background(.white.opacity(0.14), in: RoundedRectangle(cornerRadius: isCompact ? 14 : 18))
+        VStack(alignment: .leading, spacing: isCompact ? 3 : 5) {
+          Text("New Story")
+            .font(.system(size: isCompact ? 20 : 25, weight: .bold))
+            .lineLimit(1)
+            .minimumScaleFactor(0.75)
+          Text("Start with quick setup")
+            .font(.system(size: isCompact ? 12 : 14))
+            .lineLimit(2)
+            .minimumScaleFactor(0.75)
+            .opacity(0.88)
+            .fixedSize(horizontal: false, vertical: true)
+        }
+        .layoutPriority(1)
+        Spacer(minLength: 4)
         Label("Create", systemImage: "plus")
-          .font(.system(size: 15, weight: .bold))
+          .font(.system(size: isCompact ? 13 : 15, weight: .bold))
           .foregroundStyle(blue)
           .fixedSize(horizontal: true, vertical: false)
-          .padding(.horizontal, 14).padding(.vertical, 13)
+          .padding(.horizontal, isCompact ? 11 : 14)
+          .padding(.vertical, isCompact ? 10 : 13)
           .background(.white, in: Capsule())
       }
       .foregroundStyle(.white)
-      .padding(18)
-      .frame(maxWidth: .infinity, minHeight: 114)
-      .background(LinearGradient(colors: [Color(hex: "#087CFF"), Color(hex: "#0060FF")], startPoint: .topLeading, endPoint: .bottomTrailing), in: RoundedRectangle(cornerRadius: 22))
+      .padding(isCompact ? 13 : 18)
+      .frame(maxWidth: .infinity, minHeight: isCompact ? 92 : 114)
+      .background(LinearGradient(colors: [Color(hex: "#087CFF"), Color(hex: "#0060FF")], startPoint: .topLeading, endPoint: .bottomTrailing), in: RoundedRectangle(cornerRadius: isCompact ? 18 : 22))
     }.buttonStyle(InteractiveScaleButtonStyle())
   }
 
@@ -200,11 +226,21 @@ struct HomeView: View {
         .frame(height: 78).clipShape(RoundedRectangle(cornerRadius: 14))
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(.primary.opacity(0.08)))
       Text(theme.id == "blue-bubble" ? "Apple Messages" : theme.name)
-        .font(.system(size: 16, weight: .bold)).lineLimit(1).minimumScaleFactor(0.8)
-      Text(theme.id == "blue-bubble" ? "Classic iMessage style with blue and gray bubbles." : theme.id == "green-bubble" ? "Realistic WhatsApp style with green and white bubbles." : theme.subtitle)
-        .font(.system(size: 12)).foregroundStyle(secondary).lineSpacing(3)
+        .font(.system(size: 15, weight: .bold))
+        .lineLimit(2)
+        .minimumScaleFactor(0.75)
+        .multilineTextAlignment(.leading)
         .fixedSize(horizontal: false, vertical: true)
-        .frame(minHeight: 48, alignment: .topLeading)
+        .frame(height: 40, alignment: .topLeading)
+      Text(theme.id == "blue-bubble" ? "Classic iMessage style with blue and gray bubbles." : theme.id == "green-bubble" ? "Realistic WhatsApp style with green and white bubbles." : theme.subtitle)
+        .font(.system(size: 12))
+        .foregroundStyle(secondary)
+        .lineSpacing(2)
+        .lineLimit(3)
+        .minimumScaleFactor(0.8)
+        .multilineTextAlignment(.leading)
+        .fixedSize(horizontal: false, vertical: true)
+        .frame(height: 52, alignment: .topLeading)
       Button(action: action) {
         Text("Use Style").font(.system(size: 14, weight: .semibold))
           .frame(maxWidth: .infinity).padding(.vertical, 11)

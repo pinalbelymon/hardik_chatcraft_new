@@ -2,6 +2,24 @@ import AVFoundation
 import PhotosUI
 import SwiftUI
 import UIKit
+import UniformTypeIdentifiers
+
+struct MovieTransferable: Transferable {
+  let url: URL
+
+  static var transferRepresentation: some TransferRepresentation {
+    FileRepresentation(contentType: .movie) { movie in
+      SentTransferredFile(movie.url)
+    } importing: { received in
+      let copy = FileManager.default.temporaryDirectory
+        .appendingPathComponent(UUID().uuidString)
+        .appendingPathExtension(received.file.pathExtension.isEmpty ? "mov" : received.file.pathExtension)
+      try FileManager.default.copyItem(at: received.file, to: copy)
+      return Self(url: copy)
+    }
+  }
+}
+
 struct MessageComposerRoute: Identifiable {
   let id = UUID()
   let message: ChatMessage?
@@ -22,6 +40,8 @@ struct ChatEditorView: View {
   @State private var quickText = ""
   @State private var quickPhotoItem: PhotosPickerItem?
   @State private var quickVideoItem: PhotosPickerItem?
+  @State private var showPhotoPicker = false
+  @State private var showVideoPicker = false
   @State private var isProcessingVideo = false
   @FocusState private var isInputFocused: Bool
 
@@ -89,6 +109,8 @@ struct ChatEditorView: View {
       }
     }
     .trackScreen(.editor)
+    .photosPicker(isPresented: $showPhotoPicker, selection: $quickPhotoItem, matching: .images)
+    .photosPicker(isPresented: $showVideoPicker, selection: $quickVideoItem, matching: .videos)
     .onAppear {
       if activeCharacterID == nil {
         activeCharacterID = story.characters.first?.id
@@ -102,9 +124,14 @@ struct ChatEditorView: View {
     .onChange(of: quickPhotoItem) { item in
       guard let item else { return }
       Task {
-        if let data = try? await item.loadTransferable(type: Data.self) {
+        if let rawData = try? await item.loadTransferable(type: Data.self) {
+          let processed = UIImage(data: rawData)?.jpegData(compressionQuality: 0.85) ?? rawData
           await MainActor.run {
-            addMediaMessage(type: .image, data: data)
+            addMediaMessage(type: .image, data: processed)
+            quickPhotoItem = nil
+          }
+        } else {
+          await MainActor.run {
             quickPhotoItem = nil
           }
         }
@@ -114,18 +141,29 @@ struct ChatEditorView: View {
       guard let item else { return }
       Task {
         await MainActor.run { isProcessingVideo = true }
-        if let videoData = try? await item.loadTransferable(type: Data.self),
-           let thumbData = await VideoThumbnailGenerator.thumbnailJPEGData(from: videoData) {
-          await MainActor.run {
-            addMediaMessage(type: .video, data: thumbData)
-            isProcessingVideo = false
-            quickVideoItem = nil
+        var thumbData: Data?
+
+        if let movie = try? await item.loadTransferable(type: MovieTransferable.self) {
+          thumbData = await VideoThumbnailGenerator.thumbnailJPEGData(from: movie.url)
+          try? FileManager.default.removeItem(at: movie.url)
+        }
+
+        if thumbData == nil, let videoData = try? await item.loadTransferable(type: Data.self) {
+          thumbData = await VideoThumbnailGenerator.thumbnailJPEGData(from: videoData)
+        }
+
+        let resultData = thumbData
+        await MainActor.run {
+          if let resultData {
+            addMediaMessage(type: .video, data: resultData)
+          } else {
+            let placeholder = UIImage(systemName: "video.fill")?.withTintColor(.systemGray, renderingMode: .alwaysOriginal)
+            if let fallbackData = placeholder?.pngData() {
+              addMediaMessage(type: .video, data: fallbackData)
+            }
           }
-        } else {
-          await MainActor.run {
-            isProcessingVideo = false
-            quickVideoItem = nil
-          }
+          isProcessingVideo = false
+          quickVideoItem = nil
         }
       }
     }
@@ -464,42 +502,48 @@ struct ChatEditorView: View {
   private var attachmentMenu: some View {
     Menu {
       Section("Add Media & Special Bubbles") {
-        // Image message
-        PhotosPicker(selection: $quickPhotoItem, matching: .images) {
-          Label("Photo Message", systemImage: "photo")
-        }
+        if subscriptionManager.currentPlan != .free {
+          // Image message
+          Button {
+            showPhotoPicker = true
+          } label: {
+            Label("Photo Message", systemImage: "photo")
+          }
 
-        // Video message
-        PhotosPicker(selection: $quickVideoItem, matching: .videos) {
-          Label("Video Message", systemImage: "video")
-        }
+          // Video message
+          Button {
+            showVideoPicker = true
+          } label: {
+            Label("Video Message", systemImage: "video")
+          }
 
-        // Voice Note
-        Button {
-          addSpecialMessage(type: .voice, text: "Voice note")
-        } label: {
-          Label("Voice Note", systemImage: "mic.fill")
-        }
+          // Voice Note
+          Button {
+            addSpecialMessage(type: .voice, text: "Voice note")
+          } label: {
+            Label("Voice Note", systemImage: "mic.fill")
+          }
 
-        // Typing indicator
-        Button {
-          addSpecialMessage(type: .typingIndicator, text: "typing...")
-        } label: {
-          Label("Typing Indicator", systemImage: "ellipsis.bubble")
-        }
+          // Typing indicator
+          Button {
+            addSpecialMessage(type: .typingIndicator, text: "typing...")
+          } label: {
+            Label("Typing Indicator", systemImage: "ellipsis.bubble")
+          }
 
-        // Timestamp / Date divider
-        Button {
-          addSpecialMessage(type: .timestamp, text: "Today")
-        } label: {
-          Label("Date / Time Separator", systemImage: "calendar")
-        }
+          // Timestamp / Date divider
+          Button {
+            addSpecialMessage(type: .timestamp, text: "Today")
+          } label: {
+            Label("Date / Time Separator", systemImage: "calendar")
+          }
 
-        // Reaction / Sticker
-        Button {
-          addSpecialMessage(type: .reaction, text: "❤️")
-        } label: {
-          Label("Heart Reaction", systemImage: "heart.fill")
+          // Reaction / Sticker
+          Button {
+            addSpecialMessage(type: .reaction, text: "❤️")
+          } label: {
+            Label("Heart Reaction", systemImage: "heart.fill")
+          }
         }
 
         // System notice
@@ -761,6 +805,7 @@ private struct MessageManagerView: View {
     .toolbar {
       ToolbarItem(placement: .cancellationAction) {
         Button("Done") { dismiss() }
+          .transaction { $0.animation = nil }
       }
       ToolbarItem(placement: .primaryAction) {
         Button {
@@ -770,6 +815,7 @@ private struct MessageManagerView: View {
         }
       }
     }
+    .detailAds()
     .sheet(item: $composerRoute) { route in
       NavigationStack {
         MessageComposerSheet(story: story, existingMessage: route.message) { message in
@@ -1184,14 +1230,40 @@ private struct MessageComposerSheet: View {
     isGeneratingVideoThumbnail = true
     defer { isGeneratingVideoThumbnail = false }
 
-    guard let videoData = try? await item.loadTransferable(type: Data.self) else {
-      return
+    if let movie = try? await item.loadTransferable(type: MovieTransferable.self) {
+      let thumb = await VideoThumbnailGenerator.thumbnailJPEGData(from: movie.url)
+      try? FileManager.default.removeItem(at: movie.url)
+      if let thumb {
+        mediaData = thumb
+        return
+      }
     }
-    mediaData = await VideoThumbnailGenerator.thumbnailJPEGData(from: videoData)
+
+    if let videoData = try? await item.loadTransferable(type: Data.self) {
+      mediaData = await VideoThumbnailGenerator.thumbnailJPEGData(from: videoData)
+    }
   }
 }
 
 private enum VideoThumbnailGenerator {
+  static func thumbnailJPEGData(from url: URL) async -> Data? {
+    let asset = AVAsset(url: url)
+    let generator = AVAssetImageGenerator(asset: asset)
+    generator.appliesPreferredTrackTransform = true
+    generator.maximumSize = CGSize(width: 900, height: 900)
+
+    let preferredTime = CMTime(seconds: 0.6, preferredTimescale: 600)
+    do {
+      let image = try generator.copyCGImage(at: preferredTime, actualTime: nil)
+      return UIImage(cgImage: image).jpegData(compressionQuality: 0.84)
+    } catch {
+      if let fallbackImage = try? generator.copyCGImage(at: .zero, actualTime: nil) {
+        return UIImage(cgImage: fallbackImage).jpegData(compressionQuality: 0.84)
+      }
+      return nil
+    }
+  }
+
   static func thumbnailJPEGData(from data: Data) async -> Data? {
     let url = FileManager.default.temporaryDirectory
       .appendingPathComponent(UUID().uuidString)
@@ -1200,15 +1272,7 @@ private enum VideoThumbnailGenerator {
     do {
       try data.write(to: url, options: [.atomic])
       defer { try? FileManager.default.removeItem(at: url) }
-
-      let asset = AVAsset(url: url)
-      let generator = AVAssetImageGenerator(asset: asset)
-      generator.appliesPreferredTrackTransform = true
-      generator.maximumSize = CGSize(width: 900, height: 900)
-
-      let preferredTime = CMTime(seconds: 0.6, preferredTimescale: 600)
-      let image = try generator.copyCGImage(at: preferredTime, actualTime: nil)
-      return UIImage(cgImage: image).jpegData(compressionQuality: 0.84)
+      return await thumbnailJPEGData(from: url)
     } catch {
       return nil
     }

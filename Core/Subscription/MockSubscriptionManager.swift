@@ -209,11 +209,14 @@ final class SubscriptionManager: ObservableObject {
     func isFeatureUnlocked(feature: FeatureAccess) -> Bool {
         switch currentPlan {
         case .free:
-            return [.textMessages, .screenshotExport].contains(feature)
+            return [.textMessages, .systemMessages, .screenshotExport].contains(feature)
         case .lite:
             return [
                 .textMessages,
+                .systemMessages,
                 .imageMessages,
+                .videoMessages,
+                .voiceMessages,
                 .typingIndicators,
                 .dateSeparators,
                 .messageReactions,
