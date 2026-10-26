@@ -441,6 +441,7 @@ struct ProjectsView: View {
         showBuilder = false
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
           navigationPath.append(story.id)
+          AdsController.shared.completedNaturalBreak()
         }
       }
     }

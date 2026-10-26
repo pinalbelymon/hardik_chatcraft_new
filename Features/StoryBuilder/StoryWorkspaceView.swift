@@ -55,6 +55,7 @@ struct StoryWorkspaceView: View {
 
   @State private var story: ChatStory?
   @State private var selectedTab: StoryWorkspaceTab = .editor
+  @State private var isKeyboardVisible = false
 
   var body: some View {
     Group {
@@ -80,6 +81,22 @@ struct StoryWorkspaceView: View {
     }
     .onAppear {
       story = store.story(with: storyID)
+      AdsController.shared.preloadInterstitialIfNeeded()
+    }
+    .onChange(of: selectedTab) { newTab in
+      if newTab == .preview {
+        AdsController.shared.completedNaturalBreak()
+      }
+    }
+    .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
+      withAnimation(.spring(response: 0.32, dampingFraction: 0.86)) {
+        isKeyboardVisible = true
+      }
+    }
+    .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+      withAnimation(.spring(response: 0.32, dampingFraction: 0.86)) {
+        isKeyboardVisible = false
+      }
     }
   }
 
@@ -118,8 +135,14 @@ struct StoryWorkspaceView: View {
           }
         } else {
           VStack(spacing: 0) {
-            WorkspaceFlowBar(selectedTab: $selectedTab)
-              .zIndex(20)
+            if !isKeyboardVisible {
+              WorkspaceFlowBar(selectedTab: $selectedTab)
+                .transition(.asymmetric(
+                  insertion: .opacity.combined(with: .move(edge: .top)),
+                  removal: .opacity.combined(with: .move(edge: .top))
+                ))
+                .zIndex(20)
+            }
             tabContent(story)
               .zIndex(0)
           }

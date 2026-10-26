@@ -43,6 +43,7 @@ struct ChatEditorView: View {
   @State private var showPhotoPicker = false
   @State private var showVideoPicker = false
   @State private var isProcessingVideo = false
+  @State private var isKeyboardVisible = false
   @FocusState private var isInputFocused: Bool
 
   private var theme: ChatTheme { story.theme }
@@ -58,20 +59,36 @@ struct ChatEditorView: View {
   var body: some View {
     GeometryReader { geometry in
       VStack(spacing: 0) {
-        editorQuickBar
-          .padding(.horizontal, AppSpacing.sm)
-          .padding(.vertical, isCompactDevice ? 4 : AppSpacing.xs)
+        if !isKeyboardVisible {
+          editorQuickBar
+            .padding(.horizontal, AppSpacing.sm)
+            .padding(.vertical, isCompactDevice ? 4 : AppSpacing.xs)
+            .transition(.asymmetric(
+              insertion: .opacity.combined(with: .move(edge: .top)),
+              removal: .opacity.combined(with: .move(edge: .top))
+            ))
+        }
 
-        chatPreview(width: geometry.size.width - AppSpacing.md)
-          .padding(.horizontal, AppSpacing.xs)
+        chatPreview(width: geometry.size.width - (isKeyboardVisible ? AppSpacing.xs : AppSpacing.md))
+          .padding(.horizontal, isKeyboardVisible ? 0 : AppSpacing.xs)
           .frame(maxHeight: .infinity)
 
         inlineComposerDock
           .padding(.horizontal, isCompactDevice ? AppSpacing.xs : AppSpacing.sm)
-          .padding(.vertical, isCompactDevice ? 4 : AppSpacing.xs)
+          .padding(.vertical, isCompactDevice ? 4 : (isKeyboardVisible ? 2 : AppSpacing.xs))
       }
       .frame(maxWidth: .infinity, maxHeight: .infinity)
       .background(PremiumBackdrop())
+    }
+    .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
+      withAnimation(.spring(response: 0.32, dampingFraction: 0.86)) {
+        isKeyboardVisible = true
+      }
+    }
+    .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+      withAnimation(.spring(response: 0.32, dampingFraction: 0.86)) {
+        isKeyboardVisible = false
+      }
     }
     .sheet(item: $composerRoute) { route in
       NavigationStack {
@@ -314,9 +331,18 @@ struct ChatEditorView: View {
               minHeight: scrollGeometry.size.height,
               alignment: story.messages.isEmpty ? .center : .top
             )
-            .padding(.vertical, story.messages.isEmpty ? 0 : AppSpacing.md)
+            .padding(.vertical, story.messages.isEmpty ? 0 : (isKeyboardVisible ? AppSpacing.xs : AppSpacing.md))
           }
-          .background(chatBackground)
+          .scrollDismissesKeyboard(.interactively)
+          .background(
+            chatBackground
+              .contentShape(Rectangle())
+              .onTapGesture {
+                if isKeyboardVisible {
+                  isInputFocused = false
+                }
+              }
+          )
           .clipped()
           .onChange(of: story.messages.count) { _ in
             if let last = story.messages.last {
@@ -325,21 +351,36 @@ struct ChatEditorView: View {
               }
             }
           }
+          .onChange(of: isKeyboardVisible) { visible in
+            if visible, let last = story.messages.last {
+              DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.86)) {
+                  proxy.scrollTo(last.id, anchor: .bottom)
+                }
+              }
+            }
+          }
         }
       }
       .zIndex(1)
 
-      ChatInputBarPreview(
-        theme: theme,
-        placeholder: theme.inputPlaceholder,
-        roundedCorners: [.bottomLeft, .bottomRight],
-        cornerRadius: previewFrameCornerRadius,
-        isDockedInChatFrame: true
-      )
-      .zIndex(2)
-      .contentShape(Rectangle())
-      .onTapGesture {
-        isInputFocused = true
+      if !isKeyboardVisible {
+        ChatInputBarPreview(
+          theme: theme,
+          placeholder: theme.inputPlaceholder,
+          roundedCorners: [.bottomLeft, .bottomRight],
+          cornerRadius: previewFrameCornerRadius,
+          isDockedInChatFrame: true
+        )
+        .zIndex(2)
+        .contentShape(Rectangle())
+        .onTapGesture {
+          isInputFocused = true
+        }
+        .transition(.asymmetric(
+          insertion: .opacity.combined(with: .move(edge: .bottom)),
+          removal: .opacity.combined(with: .move(edge: .bottom))
+        ))
       }
     }
     .background(

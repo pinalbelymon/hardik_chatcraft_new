@@ -37,11 +37,13 @@ enum AdUnits {
     static let native = "ca-app-pub-3940256099942544/3986624511"
     static let interstitial = "ca-app-pub-3940256099942544/4411468910"
     static let appOpen = "ca-app-pub-3940256099942544/5575463023"
+    static let rewarded = "ca-app-pub-3940256099942544/1712485313"
     #else
     // ChatCraft production inventory, compiled into Release / App Store archives only.
     static let banner = "ca-app-pub-3587863765939885/3504282612"
     static let native = "ca-app-pub-3587863765939885/2719657867"
     static let interstitial = "ca-app-pub-3587863765939885/5345821202"
     static let appOpen = "ca-app-pub-3587863765939885/6126576527"
+    static let rewarded = "ca-app-pub-3587863765939885/2240568720"
     #endif
 }

@@ -30,6 +30,7 @@ struct ExportView: View {
     @State private var selectedFormat: ExportFormat = .vertical916
     @State private var exportScope: ExportScope = .conversationArea
     @State private var includeWatermark = true
+    @State private var unlockedWatermarkByReward = false
     @State private var exportedURL: URL?
     @State private var statusMessage: String?
     @State private var showPaywall = false
@@ -37,6 +38,9 @@ struct ExportView: View {
     @State private var selectedAreaScrollProgress: CGFloat = 0
     @State private var selectedAreaMeasuredTimelineHeight: CGFloat = 0
     @State private var exportedAssetKind: ExportedAssetKind?
+    @State private var isLoadingAd = false
+    @State private var showAdAlert = false
+    @State private var adAlertMessage: String?
 
     var body: some View {
         ResponsiveContainer(maxWidth: 980) { width in
@@ -61,11 +65,37 @@ struct ExportView: View {
         .onDisappear {
             isExportVisible = false
         }
+        .overlay {
+            if isLoadingAd {
+                ZStack {
+                    Color.black.opacity(0.4).ignoresSafeArea()
+                    VStack(spacing: AppSpacing.sm) {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                            .tint(.white)
+                            .scaleEffect(1.2)
+                        Text("Loading advertisement...")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.white)
+                    }
+                    .padding(AppSpacing.lg)
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: AppRadius.md, style: .continuous))
+                }
+                .transition(.opacity)
+            }
+        }
+        .alert("Advertisement", isPresented: $showAdAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(adAlertMessage ?? "Ad is currently unavailable. Please try again.")
+        }
         .background(PremiumBackdrop())
         .trackScreen(.export)
         .onAppear {
             isExportVisible = true
-            includeWatermark = !subscriptionManager.canExportWithoutWatermark()
+            if !unlockedWatermarkByReward {
+                includeWatermark = !subscriptionManager.canExportWithoutWatermark()
+            }
             selectedFormat = story.exportFormat
             AdsController.shared.preloadInterstitialIfNeeded()
         }
@@ -153,10 +183,56 @@ struct ExportView: View {
             Toggle(isOn: watermarkBinding) {
                 HStack {
                     Text("Watermark")
-                    if !subscriptionManager.canExportWithoutWatermark() {
+                    if unlockedWatermarkByReward {
+                        Text("Unlocked by Ad")
+                            .font(.caption2.weight(.bold))
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(AppColors.success.opacity(0.15), in: Capsule())
+                            .foregroundStyle(AppColors.success)
+                    } else if !subscriptionManager.canExportWithoutWatermark() {
                         LockBadgeView(label: subscriptionManager.currentPlan.title)
                     }
                 }
+            }
+
+            if !canExportWithoutWatermark {
+                Button {
+                    requestRewardedAd()
+                } label: {
+                    HStack(spacing: AppSpacing.xs) {
+                        if isLoadingAd {
+                            ProgressView()
+                                .progressViewStyle(.circular)
+                                .scaleEffect(0.8)
+                        } else {
+                            Image(systemName: "play.circle.fill")
+                                .foregroundStyle(AppColors.appTint)
+                        }
+                        Text(isLoadingAd ? "Loading ad..." : "Remove watermark for this export")
+                            .font(.caption.weight(.semibold))
+                        Spacer()
+                        Text(isLoadingAd ? "Please wait" : "Watch Ad")
+                            .font(.caption2.weight(.bold))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(AppColors.appTint.opacity(0.12), in: Capsule())
+                            .foregroundStyle(AppColors.appTint)
+                    }
+                    .padding(.vertical, AppSpacing.xxs)
+                }
+                .buttonStyle(.plain)
+                .disabled(isLoadingAd)
+            } else if unlockedWatermarkByReward {
+                HStack(spacing: AppSpacing.xs) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(AppColors.success)
+                    Text("Watermark removed for this export")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(AppColors.success)
+                    Spacer()
+                }
+                .padding(.vertical, AppSpacing.xxs)
             }
         }
         .premiumSurface()
@@ -272,11 +348,20 @@ struct ExportView: View {
         }
     }
 
+    private var canExportWithoutWatermark: Bool {
+        subscriptionManager.canExportWithoutWatermark() || unlockedWatermarkByReward
+    }
+
     private var watermarkBinding: Binding<Bool> {
         Binding(
-            get: { includeWatermark || !subscriptionManager.canExportWithoutWatermark() },
+            get: {
+                if unlockedWatermarkByReward {
+                    return includeWatermark
+                }
+                return includeWatermark || !subscriptionManager.canExportWithoutWatermark()
+            },
             set: { newValue in
-                if subscriptionManager.canExportWithoutWatermark() {
+                if canExportWithoutWatermark {
                     includeWatermark = newValue
                 } else {
                     includeWatermark = true
@@ -357,6 +442,36 @@ struct ExportView: View {
             AppAnalytics.shared.track(.exportShareOpen, ["media_type": exportedAssetKind == .video ? "video" : "image"])
             showExportShare = true
         }
+    }
+
+    private func requestRewardedAd() {
+        guard !isLoadingAd else { return }
+        isLoadingAd = true
+        AdsController.shared.showRewarded(
+            onStartLoading: {
+                withAnimation { isLoadingAd = true }
+            },
+            onReadyToPresent: {
+                withAnimation { isLoadingAd = false }
+            },
+            onReward: {
+                withAnimation {
+                    unlockedWatermarkByReward = true
+                    includeWatermark = false
+                    statusMessage = "Watermark removed for this export!"
+                }
+            },
+            onError: { errorMessage in
+                withAnimation {
+                    isLoadingAd = false
+                    adAlertMessage = errorMessage
+                    showAdAlert = true
+                }
+            },
+            onDismiss: {
+                withAnimation { isLoadingAd = false }
+            }
+        )
     }
 
     private var exportLayoutWidth: CGFloat {

@@ -38,13 +38,15 @@ private final class BannerModel: NSObject, ObservableObject, BannerViewDelegate 
     private var timeout: Task<Void, Never>?
     private var attempted = false
 
-    func load() {
+    func load(width: CGFloat = UIScreen.main.bounds.width) {
         guard !attempted, AdsController.shared.canRequestAds else { return }
         attempted = true
         state = .loading
-        let banner = BannerView(adSize: AdSizeBanner)
+        let validWidth = max(width, 320)
+        let adSize = currentOrientationAnchoredAdaptiveBanner(width: validWidth)
+        let banner = BannerView(adSize: adSize)
         banner.adUnitID = AdUnits.banner
-        banner.rootViewController = AdsController.presenter
+        banner.rootViewController = AdsController.topPresenter ?? AdsController.presenter
         banner.delegate = self
         view = banner
         banner.load(Request())
@@ -97,12 +99,14 @@ struct BannerAdSlot: View {
                 ZStack {
                     // Keep the SDK view attached while loading so visibility/refresh work correctly.
                     if let banner = model.view {
-                        BannerContent(banner: banner).frame(width: 320, height: 50)
+                        BannerContent(banner: banner)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 50)
                             .opacity(model.state == .loaded ? 1 : 0)
                             .allowsHitTesting(model.state == .loaded)
                     }
                     if model.state != .loaded {
-                        AdShimmer().frame(width: 320, height: 50)
+                        AdShimmer().frame(maxWidth: .infinity).frame(height: 50)
                     }
                 }
                 .frame(maxWidth: .infinity).frame(height: 60)
@@ -111,7 +115,11 @@ struct BannerAdSlot: View {
         }
         .transaction { $0.animation = nil }
         .task(id: ads.canRequestAds) {
-            if ads.canRequestAds { model.load() } else { model.clear() }
+            if ads.canRequestAds {
+                model.load()
+            } else {
+                model.clear()
+            }
         }
     }
 }
@@ -290,16 +298,19 @@ struct AdSupportedGrid<Item: Identifiable, Cell: View>: View {
 
 private struct DetailAdsModifier: ViewModifier {
     var bannerEnabled = true
-    @State private var token = UUID()
     @State private var keyboardVisible = false
     func body(content: Content) -> some View {
         content.safeAreaInset(edge: .bottom, spacing: 0) {
-            if bannerEnabled && !keyboardVisible { BannerAdSlot() }
+            if bannerEnabled {
+                BannerAdSlot()
+                    .frame(height: keyboardVisible ? 0 : 60)
+                    .opacity(keyboardVisible ? 0 : 1)
+                    .clipped()
+                    .allowsHitTesting(!keyboardVisible)
+            }
         }
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in keyboardVisible = true }
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in keyboardVisible = false }
-        .onAppear { AdsController.shared.setAppOpenBlocked(true, id: token) }
-        .onDisappear { AdsController.shared.setAppOpenBlocked(false, id: token) }
     }
 }
 
