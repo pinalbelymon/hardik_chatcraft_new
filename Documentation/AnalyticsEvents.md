@@ -24,6 +24,7 @@ Screen observers run on appear/disappear, restore the underlying screen after a 
 | Preview | preview_reveal, preview_complete, preview_reset, preview_autoplay, preview_speed, preview_fullscreen | Manual reveals, completion summary, controls; not one event per autoplay frame/message |
 | Export | export_start, export_success, export_failure, export_option | Image/video, format, scope, counts, total elapsed milliseconds; failure category, never raw error text/file paths |
 | Share | export_share_open, export_share_result | Media type and completed/cancelled flag; never the file contents/URL |
+| Reviews | review_prompt_request | StoreKit request after a story has at least three text messages; this does not confirm that a prompt appeared or a rating was submitted |
 | Paywall | plan_select, billing_select, feature_locked | Plan, cadence and the source of the gated action |
 | Purchase | purchase_start, purchase_success, purchase_cancelled, purchase_pending, purchase_failed | Plan/product ID/cadence; bounded failure categories |
 | Restore | restore_start, restore_complete, restore_failed | Result and resulting plan; restoration is not a new revenue event |

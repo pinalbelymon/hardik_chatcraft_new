@@ -1,5 +1,6 @@
 import AVFoundation
 import PhotosUI
+import StoreKit
 import SwiftUI
 import UIKit
 import UniformTypeIdentifiers
@@ -30,6 +31,12 @@ struct ChatEditorView: View {
 
   @EnvironmentObject private var subscriptionManager: SubscriptionManager
   @Environment(\.colorScheme) private var colorScheme
+  @Environment(\.requestReview) private var requestReview
+  @Environment(\.scenePhase) private var scenePhase
+
+  @AppStorage("chatcraft_review_requested_version") private var reviewRequestedVersion = ""
+  @AppStorage("chatcraft_review_request_count") private var reviewRequestCount = 0
+  @AppStorage("chatcraft_review_prompted_story_ids") private var promptedStoryIDs = ""
 
   @State private var composerRoute: MessageComposerRoute?
   @State private var showPaywall = false
@@ -44,9 +51,13 @@ struct ChatEditorView: View {
   @State private var showVideoPicker = false
   @State private var isProcessingVideo = false
   @State private var isKeyboardVisible = false
+  @State private var isEditorVisible = false
+  @State private var pendingReview = false
+  @State private var reviewRequestTask: Task<Void, Never>?
   @FocusState private var isInputFocused: Bool
 
   private var theme: ChatTheme { story.theme }
+  private var textMessageCount: Int { story.messages.filter { $0.type == .text }.count }
   private var isCompactDevice: Bool { DeviceSize.isCurrentCompactHeight }
 
   private var activeCharacter: ChatCharacter {
@@ -90,7 +101,7 @@ struct ChatEditorView: View {
         isKeyboardVisible = false
       }
     }
-    .sheet(item: $composerRoute) { route in
+    .sheet(item: $composerRoute, onDismiss: requestPendingReview) { route in
       NavigationStack {
         MessageComposerSheet(story: story, existingMessage: route.message) { message in
           save(message)
@@ -100,7 +111,7 @@ struct ChatEditorView: View {
     .fullScreenCover(isPresented: $showPaywall) {
       NavigationStack { PaywallView() }
     }
-    .sheet(isPresented: $showMessageManager) {
+    .sheet(isPresented: $showMessageManager, onDismiss: requestPendingReview) {
       NavigationStack {
         MessageManagerView(story: $story, isCompactDevice: isCompactDevice)
       }
@@ -129,9 +140,22 @@ struct ChatEditorView: View {
     .photosPicker(isPresented: $showPhotoPicker, selection: $quickPhotoItem, matching: .images)
     .photosPicker(isPresented: $showVideoPicker, selection: $quickVideoItem, matching: .videos)
     .onAppear {
+      isEditorVisible = true
       if activeCharacterID == nil {
         activeCharacterID = story.characters.first?.id
       }
+      scheduleReviewIfEligible()
+    }
+    .onDisappear {
+      isEditorVisible = false
+      reviewRequestTask?.cancel()
+      reviewRequestTask = nil
+    }
+    .onChange(of: textMessageCount) { count in
+      if count >= 3 { scheduleReviewIfEligible() }
+    }
+    .onChange(of: scenePhase) { phase in
+      if phase == .active, pendingReview { scheduleReviewIfEligible() }
     }
     .onChange(of: story.characters) { newChars in
       if let currentID = activeCharacterID, !newChars.contains(where: { $0.id == currentID }) {
@@ -617,6 +641,56 @@ struct ChatEditorView: View {
   }
 
   // MARK: - Helpers
+  private func requestPendingReview() {
+    if pendingReview { scheduleReviewIfEligible() }
+  }
+
+  private func scheduleReviewIfEligible() {
+    guard textMessageCount >= 3 else { return }
+    let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? ""
+    guard !version.isEmpty else { return }
+
+    let requestedCount = reviewRequestedVersion == version ? reviewRequestCount : 0
+    let reviewedStories = reviewRequestedVersion == version
+      ? Set(promptedStoryIDs.split(separator: ",").map(String.init)) : []
+    guard requestedCount < 10, !reviewedStories.contains(story.id.uuidString) else { return }
+
+    if composerRoute != nil || showMessageManager || showPaywall || showThemeSelection || showCharacterCustomization {
+      pendingReview = true
+      return
+    }
+
+    pendingReview = false
+    isInputFocused = false
+    reviewRequestTask?.cancel()
+    reviewRequestTask = Task { @MainActor in
+      // Let the third message and keyboard dismissal finish before requesting a review.
+      try? await Task.sleep(nanoseconds: 700_000_000)
+      guard !Task.isCancelled else { return }
+      guard isEditorVisible,
+            scenePhase == .active,
+            composerRoute == nil,
+            !showMessageManager,
+            !showPaywall,
+            !AdsController.shared.showingAppOpen else {
+        pendingReview = true
+        return
+      }
+
+      if reviewRequestedVersion != version {
+        reviewRequestedVersion = version
+        reviewRequestCount = 0
+        promptedStoryIDs = ""
+      }
+      reviewRequestCount += 1
+      var storyIDs = Set(promptedStoryIDs.split(separator: ",").map(String.init))
+      storyIDs.insert(story.id.uuidString)
+      promptedStoryIDs = storyIDs.sorted().joined(separator: ",")
+      AppAnalytics.shared.track(.reviewPromptRequest, ["source": "three_text_messages"])
+      requestReview()
+    }
+  }
+
   private func sendQuickText() {
     let clean = quickText.trimmingCharacters(in: .whitespacesAndNewlines)
     guard !clean.isEmpty else { return }

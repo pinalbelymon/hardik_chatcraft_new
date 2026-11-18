@@ -22,6 +22,7 @@ enum AppEvent: String {
     case previewAutoplay = "preview_autoplay", previewSpeed = "preview_speed", previewFullscreen = "preview_fullscreen"
     case exportStart = "export_start", exportSuccess = "export_success", exportFailure = "export_failure"
     case exportShareOpen = "export_share_open", exportShareResult = "export_share_result", exportOption = "export_option"
+    case reviewPromptRequest = "review_prompt_request"
     case planSelect = "plan_select", billingSelect = "billing_select", purchaseStart = "purchase_start"
     case purchaseSuccess = "purchase_success", purchaseCancelled = "purchase_cancelled", purchasePending = "purchase_pending", purchaseFailed = "purchase_failed"
     case restoreStart = "restore_start", restoreComplete = "restore_complete", restoreFailed = "restore_failed"
